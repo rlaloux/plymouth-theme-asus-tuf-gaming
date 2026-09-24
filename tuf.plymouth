@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=TUF Gaming
+Description=ASUS TUF Gaming inspired Plymouth boot theme
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/tuf
+ScriptFile=/usr/share/plymouth/themes/tuf/tuf.script

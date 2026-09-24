@@ -1,0 +1,120 @@
+# TUF Gaming Plymouth theme
+# Black background, centered TUF logo and a small rotating white spinner.
+
+Window.SetBackgroundTopColor(0.0, 0.0, 0.0);
+Window.SetBackgroundBottomColor(0.0, 0.0, 0.0);
+
+screen_w = Window.GetWidth(0);
+screen_h = Window.GetHeight(0);
+screen_cx = screen_w / 2;
+
+# Scale the logo with the display: about 18% of width, capped at 450 px (was 320).
+logo_source = Image("tuf-logo.png");
+logo_size = Math.Int(screen_w * 0.18);
+if (logo_size > 450) {
+    logo_size = 450;
+}
+if (logo_size < 96) {
+    logo_size = 96;
+}
+logo_image = logo_source.Scale(logo_size, logo_size);
+
+logo_sprite = Sprite(logo_image);
+logo_sprite.SetX(screen_cx - logo_image.GetWidth() / 2);
+# Logo center around 39% of screen height.
+logo_sprite.SetY(Math.Int(screen_h * 0.39 - logo_image.GetHeight() / 2));
+
+# Spinner frames.
+for (i = 0; i < 12; i++) {
+    spinner_source[i] = Image("spinner/spinner-" + i + ".png");
+}
+
+spinner_size = Math.Int(screen_w * 0.028);
+if (spinner_size > 56) {
+    spinner_size = 56;
+}
+if (spinner_size < 24) {
+    spinner_size = 24;
+}
+
+for (i = 0; i < 12; i++) {
+    spinner_image[i] = spinner_source[i].Scale(spinner_size, spinner_size);
+}
+
+spinner_sprite = Sprite(spinner_image[0]);
+spinner_sprite.SetX(screen_cx - spinner_size / 2);
+# Spinner around 75% (was 64) of screen height.
+spinner_sprite.SetY(Math.Int(screen_h * 0.75 - spinner_size / 2));
+
+progress = 0;
+
+fun refresh_callback ()
+{
+    # 12 frames, roughly one revolution per ~0.6-0.8 s.
+    frame = Math.Int(progress / 3) % 12;
+    spinner_sprite.SetImage(spinner_image[frame]);
+    progress++;
+}
+
+Plymouth.SetRefreshFunction(refresh_callback);
+
+# Keep boot questions/password prompts usable if they are ever needed.
+question = null;
+answer = null;
+prompt = null;
+bullets = null;
+bullet_image = Image.Text("*", 1, 1, 1);
+
+fun DisplayQuestionCallback(prompt_text, entry)
+{
+    question = null;
+    answer = null;
+
+    if (entry == "") {
+        entry = "<answer>";
+    }
+
+    question.image = Image.Text(prompt_text, 1, 1, 1);
+    question.sprite = Sprite(question.image);
+    question.sprite.SetX(screen_cx - question.image.GetWidth() / 2);
+    question.sprite.SetY(screen_h - 4 * question.image.GetHeight());
+
+    answer.image = Image.Text(entry, 1, 1, 1);
+    answer.sprite = Sprite(answer.image);
+    answer.sprite.SetX(screen_cx - answer.image.GetWidth() / 2);
+    answer.sprite.SetY(screen_h - 2 * answer.image.GetHeight());
+}
+
+Plymouth.SetDisplayQuestionFunction(DisplayQuestionCallback);
+
+fun DisplayPasswordCallback(nil, bulletCount)
+{
+    prompt = null;
+    bullets = null;
+
+    prompt.image = Image.Text("Enter Password", 1, 1, 1);
+    prompt.sprite = Sprite(prompt.image);
+    prompt.sprite.SetX(screen_cx - prompt.image.GetWidth() / 2);
+    prompt.sprite.SetY(screen_h - 4 * prompt.image.GetHeight());
+
+    totalWidth = bulletCount * bullet_image.GetWidth();
+    startPos = screen_cx - totalWidth / 2;
+
+    for (i = 0; i < bulletCount; i++) {
+        bullets[i].sprite = Sprite(bullet_image);
+        bullets[i].sprite.SetX(startPos + i * bullet_image.GetWidth());
+        bullets[i].sprite.SetY(screen_h - 2 * bullet_image.GetHeight());
+    }
+}
+
+Plymouth.SetDisplayPasswordFunction(DisplayPasswordCallback);
+
+fun DisplayNormalCallback()
+{
+    bullets = null;
+    prompt = null;
+    question = null;
+    answer = null;
+}
+
+Plymouth.SetDisplayNormalFunction(DisplayNormalCallback);
