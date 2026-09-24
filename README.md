@@ -57,5 +57,7 @@ Finally, remove the theme:
 
 ## Preview
 
+![til](preview.gif)
+
 The supplied `preview.gif` is only a visual approximation; actual positioning is calculated by the Plymouth script at boot resolution.
 
